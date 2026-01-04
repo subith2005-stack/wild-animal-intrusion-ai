@@ -2,11 +2,15 @@ import streamlit as st
 import cv2
 import time
 from datetime import datetime
+from alerts.sms_alerts import send_sms
 
 from model.detector import detect_ani
 from alerts.alert import trigger_alert
 
 #------------Configuration------------#
+
+farmer_phone_number = "+918921828286"
+
 wild_animals = ["elephant", "tiger", "boar", "deer"]
 conf_threshold = 0.5
 
@@ -104,8 +108,17 @@ if st.session_state.run:
                         trigger_alert(name, conf)
                         st.session_state.animal_detected = True 
 
-                        st.session_state.alert_count += 1
                         alert_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+                        send_sms(
+                            to_number=farmer_phone_number,
+                            animal_name=name,
+                            confidence=conf,
+                            
+                            time=alert_time,
+                            )
+
+                        st.session_state.alert_count += 1
                         st.session_state.last_alert_time = alert_time
                         st.session_state.alert_log.append(
                             {
@@ -149,6 +162,6 @@ if st.session_state.alert_log:
     for log in st.session_state.alert_log[-5:]:
         st.write(
             f"- Time: {log['time']}, Animal: {log['animal']}, Confidence: {log['confidence']:.2f}"
-        )
+        )                                                                                               
 else:
     st.write("No alerts triggered yet.")
