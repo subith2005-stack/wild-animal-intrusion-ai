@@ -6,12 +6,11 @@ from datetime import datetime
 from model.detector import detect_ani
 from model.classifier import classify_animal
 from alerts.alert import trigger_alert
-# from alerts.sms_alert import send_sms_alert
+from alerts.sms_alerts import send_sms
 
 # ---------------- CONFIG ----------------
-CONF_THRESHOLD = 0.7
-ENABLE_SMS = False
-FARMER_PHONE = "+91XXXXXXXXXX"
+CONF_THRESHOLD = 0.5
+FARMER_PHONE = "+918921828286"
 
 # ---------------- STREAMLIT SETUP ----------------
 st.set_page_config(page_title="Wild Animal Intrusion Detection")
@@ -106,9 +105,8 @@ if st.session_state.run:
                     st.session_state.alert_log.append(
                         f"{st.session_state.alert_count}. {animal} at {alert_time}"
                     )
-
-                    # if ENABLE_SMS:
-                    #     send_sms_alert(FARMER_PHONE, animal, conf, alert_time)
+                    
+                    send_sms(FARMER_PHONE, animal, conf, alert_time)
 
         if not wild_detected:
             st.session_state.animal_present = False
