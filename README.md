@@ -290,4 +290,197 @@ Users should combine this system with other traditional and modern farming prote
 - **Customizable Alerts**: Configurable alert thresholds and notification preferences
 - **Offline Capability**: Local processing without internet connectivity
 
+12. **Development Methodology and System Evolution**
+
+This project was developed through a structured, multi-level progression approach, where each stage addressed a specific technical challenge and built upon the previous one. The system evolved from a basic detection prototype into a robust, event-driven intrusion detection system suitable for real-world agricultural use.
+
+Level 1: **Basic Object Detection Prototype**
+
+Objective:
+Establish a working baseline capable of detecting animals in a live camera feed.
+
+Approach:
+
+Integrated YOLOv8 for real-time object detection.
+
+Verified detection of animals and humans using bounding boxes and confidence scores.
+
+Displayed raw detections on video frames.
+
+Challenges Identified:
+
+High number of false positives.
+
+Momentary detections triggered alerts prematurely.
+
+No distinction between transient and meaningful detections.
+
+Outcome:
+A functional but unreliable prototype that highlighted the need for confirmation logic.
+
+Level 2: **Species-Level Animal Classification**
+
+Objective:
+Move beyond generic animal detection and identify specific wild animal species.
+
+Approach:
+
+Introduced a ResNet-18 based classifier trained on curated wildlife datasets.
+
+Cropped detected animal regions and passed them to the classifier.
+
+Classified animals into boar, deer, elephant, and tiger.
+
+Challenges Identified:
+
+Classification noise in early frames.
+
+Rapid misclassification when animals entered the frame partially.
+
+Outcome:
+Accurate species identification capability, but still vulnerable to unstable predictions.
+
+Level 3: **Frame-Based Confirmation Buffer**
+
+Objective:
+Eliminate false positives caused by single-frame misclassifications.
+
+Approach:
+
+Implemented a rolling prediction buffer of 7 frames.
+
+Applied majority voting to confirm animal presence.
+
+Required a minimum of 4 consistent detections to confirm an animal.
+
+Key Design Choice:
+Temporal smoothing was preferred over confidence boosting to preserve real-time performance.
+
+Outcome:
+Significantly improved detection stability and reduced false alerts.
+
+Level 4: **Trigger-Based Intrusion Modeling**
+
+Objective:
+Define meaningful intrusion events instead of frame-based detections.
+
+Approach:
+
+Introduced the concept of a trigger, defined as an appearance-to-disappearance event.
+
+Implemented a state machine using animal_present and absence_counter.
+
+Ensured that multiple frames of the same animal resulted in a single trigger.
+
+Challenges Identified:
+
+Rapid animal replacement caused triggers to merge.
+
+Absence-based reset alone was insufficient.
+
+Outcome:
+Clear event-based intrusion tracking, but still limited under complex transitions.
+
+Level 5: **Active Animal Ownership Model**
+
+Objective:
+Support unlimited triggers and immediate transitions between different animals.
+
+Approach:
+
+Introduced an active_animal state variable.
+
+Treated each confirmed animal as the owner of a trigger.
+
+Forced trigger termination and restart when a different animal became dominant.
+
+Key Insight:
+Triggers must be owned by animals, not by time gaps alone.
+
+Outcome:
+Unlimited, accurate triggers per session with correct handling of rapid animal changes.
+
+Level 6: **Alert Discipline and Spam Prevention**
+
+Objective:
+Prevent excessive alerts while maintaining safety.
+
+Approach:
+
+Introduced dual thresholds:
+
+Display threshold ≥ 0.5
+
+Alert threshold ≥ 0.7
+
+Tracked animals that already triggered SMS alerts using a set.
+
+Ensured SMS was sent only once per animal type per session.
+
+Outcome:
+Balanced alerting system that avoids notification fatigue while preserving critical alerts.
+
+Level 7: **Multi-Modal Alerting (SMS + Local Alarm)**
+
+Objective:
+Provide both remote and on-site alerts.
+
+Approach:
+
+Integrated Twilio SMS for remote notification.
+
+Added a local audible alarm triggered simultaneously with SMS.
+
+Ensured alarm activation was event-based and non-blocking.
+
+Outcome:
+Immediate situational awareness for both farmers and on-site personnel.
+
+Level 8: **Monitoring, Logging, and Post-Run Analysis**
+
+Objective:
+Improve transparency and usability of the system.
+
+Approach:
+
+Logged structured encounter data (trigger ID, animal, timestamp).
+
+Displayed live detection tables during camera operation.
+
+Rendered a persistent encounter summary table after camera shutdown.
+
+Outcome:
+Clear operational visibility and traceability of intrusion events.
+
+Level 9: **System Hardening and Hackathon Readiness**
+
+Objective:
+Prepare the system for demonstration and evaluation.
+
+Approach:
+
+Modularized detection, classification, and alert logic.
+
+Ensured safe state handling across Streamlit reruns.
+
+Integrated Git-based version control for collaborative development.
+
+Added documentation, limitations, and disclaimers.
+
+Outcome:
+A stable, demonstrable, and well-documented system suitable for real-world discussion and evaluation.
+
+**_Summary of Methodology_**
+
+The development process emphasized:
+
+Incremental validation
+
+Real-world failure handling
+
+Event-driven system design
+
+Alert responsibility and discipline
+
+Rather than focusing solely on model accuracy, the project prioritized decision correctness, system reliability, and practical usability, aligning the solution with real agricultural deployment needs.
 
