@@ -1,174 +1,224 @@
-# 🌾 Wild Animal Intrusion Detection System for Crop Protection
+Wild Animal Intrusion Detection System
+Overview
 
-An AI-based, real-time, camera-driven early warning system to detect wild animal intrusion into agricultural fields and alert farmers for timely action.
+The Wild Animal Intrusion Detection System is a real-time computer vision–based application designed to detect and classify wild animals entering agricultural areas. The system distinguishes humans from animals, confirms animal identity using temporal analysis, logs intrusion events (triggers), and sends SMS alerts only when a new animal type is detected.
 
----
+The project is designed to be technically simple, efficient, scalable, and robust, making it suitable for real-world agricultural safety use cases and hackathon demonstrations.
 
-## 📌 Problem Statement
+Problem Statement
 
-Farmers often suffer severe crop losses due to unexpected intrusion of wild animals such as elephants, wild boars, deer, and other large animals.  
-Traditional solutions like physical fencing or manual monitoring are costly, labor-intensive, and not always effective.
+Farmers and agricultural workers face significant risks from wild animal intrusions, which can lead to crop damage and human–wildlife conflict. Existing solutions often generate false alerts due to unstable predictions and lack proper notification control.
 
-There is a need for a **lightweight, affordable, real-time, camera-based system** that can automatically detect wild animals and provide **early alerts**, enabling farmers to respond before significant damage occurs.
+This system addresses these issues by:
 
----
+Using real-time object detection and classification
 
-## 🎯 Solution Overview
+Confirming animal identity over multiple frames
 
-This project implements a **real-time AI-powered wildlife intrusion detection system** using computer vision.
+Defining a clear and consistent concept of an intrusion event (trigger)
 
-The system:
-- Continuously monitors a **live camera feed**
-- Uses a **YOLOv8 deep learning model** to detect animals
-- Filters detections to focus only on **wild or harmful animals**
-- Displays **live bounding boxes and confidence scores**
-- Triggers a **non-spamming early warning alert** when a wild animal enters the scene
+Reducing alert fatigue through controlled SMS notifications
 
-The solution is designed to be:
-- CPU-friendly
-- Edge-device compatible
-- Simple to deploy
-- Easy to extend
+Key Features
 
----
+Real-time video feed processing using a webcam
 
-## 🧠 Key Features
+Human detection handled separately to avoid false animal alerts
 
-- ✅ Real-time live camera monitoring
-- ✅ AI-based animal detection (YOLOv8)
-- ✅ Bounding boxes with labels and confidence scores
-- ✅ Smart alert logic (no repeated alert spam)
-- ✅ Lightweight and edge-friendly
-- ✅ Modular and well-structured codebase
-- ✅ Git-based collaboration ready
+Machine learning–based animal classification
 
----
+Temporal smoothing using majority voting across frames
 
-## 🏗️ System Architecture
+Clear definition of a trigger as a continuous presence event
 
-Live Camera Feed
-↓
-Frame Capture (Continuous)
-↓
-AI Inference (YOLOv8 - CPU)
-↓
-Wild Animal Filtering Logic
-↓
-State-Based Alert System
-↓
-Early Warning Notification
+Accurate trigger counting and history display
 
-yaml
-Copy code
+SMS alerts sent only when a different animal type is detected
 
----
+Streamlit-based web interface for monitoring and statistics
 
-## 🧩 Project Structure
+Git-based version control for collaborative development
 
+Definition of a Trigger
+
+A trigger is defined as:
+
+The continuous presence of a confirmed wild animal from the moment it appears on the screen until it fully disappears.
+
+Key points:
+
+One trigger corresponds to one appearance–disappearance cycle
+
+Multiple frames of the same animal count as a single trigger
+
+Trigger count and logs are updated once per trigger
+
+System Architecture
+Detection Layer
+
+YOLO-based object detection identifies objects in each frame
+
+Humans are filtered out using the YOLO person class
+
+Classification Layer
+
+Cropped animal regions are passed to a trained classification model
+
+Only predictions above a confidence threshold are considered
+
+Temporal Confirmation Layer
+
+Predictions are collected over a fixed number of frames
+
+Majority voting is applied to confirm the animal identity
+
+Early misclassifications are ignored
+
+Trigger and Alert Layer
+
+A trigger starts when a confirmed animal appears
+
+A trigger ends only after the animal is absent for a defined number of frames
+
+SMS alerts are sent only if the animal type differs from the last alerted animal
+
+Technology Stack
+
+Python 3
+
+OpenCV
+
+Streamlit
+
+YOLO (Ultralytics)
+
+Custom-trained animal classification model
+
+Twilio (for SMS alerts)
+
+Git and GitHub for version control
+
+Project Structure
 wild-animal-intrusion-ai/
-│── main.py
-│── requirements.txt
-│── .gitignore
 │
+├── app.py                 # Main Streamlit application
 ├── model/
-│ ├── detector.py # YOLO model loading & inference
-│ ├── live_camera.py # Live camera frame processing
-│ └── video_detector.py # Video file based detection
+│   ├── detector.py        # YOLO-based object detection
+│   └── classifier.py      # Animal classification model
 │
 ├── alerts/
-│ └── alert.py # Alert logic
+│   └── sms_alert.py       # SMS alert handling (Twilio)
 │
-└── data/
-└── (ignored - runtime data only)
+├── requirements.txt       # Python dependencies
+├── .gitignore             # Ignored files and folders
+└── README.md              # Project documentation
 
-yaml
-Copy code
-
----
-
-## ⚙️ Technologies Used
-
-- **Language:** Python
-- **AI Model:** YOLOv8 (Ultralytics)
-- **Computer Vision:** OpenCV
-- **Deep Learning Backend:** PyTorch (via Ultralytics)
-- **Version Control:** Git & GitHub
-
----
-
-## 🚀 How It Works
-
-1. The system captures frames from a **live camera feed**
-2. Every few frames, AI inference is performed using YOLOv8
-3. Detected objects are filtered to identify **wild animals**
-4. Bounding boxes and labels are drawn on the live feed
-5. When a wild animal is detected:
-   - An alert is triggered **only once per intrusion**
-   - Alerts reset automatically when the animal leaves
-
-This prevents alert flooding and mimics real-world early warning systems.
-
----
-
-## ▶️ How to Run the Project
-
-### 1️⃣ Clone the Repository
-```bash
-git clone <your-repo-url>
+Installation and Setup
+1. Clone the Repository
+git clone <repository-url>
 cd wild-animal-intrusion-ai
-2️⃣ Create Virtual Environment (Recommended)
-bash
-Copy code
-python -m venv venv
-venv\Scripts\activate   # Windows
-3️⃣ Install Dependencies
-bash
-Copy code
+
+2. Create and Activate Virtual Environment
+python -m venv .venv
+
+
+On Windows:
+
+.venv\Scripts\activate
+
+
+On Linux/macOS:
+
+source .venv/bin/activate
+
+3. Install Dependencies
 pip install -r requirements.txt
-4️⃣ Run Live Camera Detection
-bash
-Copy code
-python main.py
-Press Q or ESC to exit the live feed.
 
-🔔 Alert Logic (Important Design Choice)
-The system uses state-based alerting:
+Environment Configuration (SMS Alerts)
 
-Alert triggers when a wild animal enters the scene
+Set the following environment variables for Twilio:
 
-No repeated alerts while the animal remains
+TWILIO_ACCOUNT_SID
+TWILIO_AUTH_TOKEN
+TWILIO_PHONE_NUMBER
 
-Alert resets when the animal leaves
 
-Alert triggers again if the animal re-enters
+Ensure:
 
-This avoids alert spam and reflects real-world surveillance behavior.
+The Twilio phone number is valid
 
-⚠️ Dataset & Model Limitations
-YOLOv8 (COCO dataset) natively supports elephant
+The recipient phone number is verified if using a trial account
 
-Animals like boar, deer, tiger are not explicitly present
+Restart the terminal after setting environment variables.
 
-Proxy classes (e.g., large animals) are used for demonstration
+Running the Application
+streamlit run app.py
 
-👉 In a real deployment, the model would be fine-tuned on a custom wildlife dataset.
 
-🔮 Future Scope
-🔹 Custom wildlife dataset training
+Steps:
 
-🔹 SMS / mobile notification alerts
+Click Start Camera in the web interface
 
-🔹 Multi-camera support
+Show an animal in front of the camera
 
-🔹 IoT integration (sirens, lights)
+Observe detection, confirmation, and trigger logging
 
-🔹 Night vision / infrared camera support
+SMS is sent only if a new animal type is detected
 
-🔹 Cloud dashboard for monitoring
+User Interface Outputs
 
-📜 Disclaimer
-This system is intended solely as an assistive early warning mechanism.
-It does not guarantee complete prevention of crop damage and does not replace physical fencing, human supervision, or wildlife management policies.
+Live video feed with bounding boxes
 
-🏁 Conclusion
-This project demonstrates how AI and computer vision can be applied practically in agriculture to reduce crop damage and improve farmer safety using simple, efficient, and scalable technology.
+Human and animal labels
+
+Current intrusion status
+
+Total number of triggers
+
+Trigger history with timestamps and animal names
+
+Alert Logic Summary
+
+Trigger count increments once per intrusion
+
+Trigger history logs all intrusions
+
+SMS alerts are rate-limited:
+
+Sent only when the detected animal type differs from the previous SMS alert
+
+Prevents repeated notifications for the same animal
+
+Design Rationale
+
+Temporal smoothing reduces false positives
+
+State-based trigger management ensures reliable alerts
+
+Separation of detection, confirmation, and notification logic improves maintainability
+
+The system is robust against flickering detections and confidence noise
+
+Version Control Workflow
+
+Feature-based branching was used during development
+
+Stable checkpoints were committed regularly
+
+Training datasets and virtual environments are excluded from version control
+
+Future Enhancements
+
+Multi-camera support
+
+Cloud-based deployment
+
+Integration with local alert systems (sirens, lights)
+
+Extended animal dataset
+
+Dashboard analytics and exportable reports
+
+Conclusion
+
+This system demonstrates a practical and scalable approach to real-time wildlife intrusion detection for agriculture. By combining computer vision, temporal reasoning, and controlled alerting, it provides reliable monitoring while minimizing false alarms and alert fatigue.
