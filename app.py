@@ -42,8 +42,8 @@ if "prediction_buffer" not in st.session_state:
 if "alert_count" not in st.session_state:
     st.session_state.alert_count = 0
 
-if "alert_log" not in st.session_state:
-    st.session_state.alert_log = []
+if "encounters" not in st.session_state:
+    st.session_state.encounters = []
 
 if "sms_sent_animals" not in st.session_state:
     st.session_state.sms_sent_animals = set()
@@ -126,10 +126,10 @@ if st.session_state.run:
             if count >= MIN_STABLE_COUNT:
                 confirmed_animal = animal
 
-        # -------- TRIGGER & SMS LOGIC (FINAL) --------
+        # -------- TRIGGER & SMS LOGIC --------
         if confirmed_animal:
 
-            # CASE 1: No trigger active → start new trigger
+            # CASE 1: No trigger active
             if not st.session_state.animal_present:
                 st.session_state.animal_present = True
                 st.session_state.active_animal = confirmed_animal
@@ -138,16 +138,17 @@ if st.session_state.run:
                 alert_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
                 st.session_state.alert_count += 1
-                st.session_state.alert_log.append(
-                    f"Trigger {st.session_state.alert_count}: "
-                    f"{confirmed_animal} at {alert_time}"
-                )
+                st.session_state.encounters.append({
+                    "Trigger": st.session_state.alert_count,
+                    "Animal": confirmed_animal,
+                    "Time": alert_time
+                })
 
                 if ENABLE_SMS and confirmed_animal not in st.session_state.sms_sent_animals:
                     send_sms(FARMER_PHONE, confirmed_animal, 1.0, alert_time)
                     st.session_state.sms_sent_animals.add(confirmed_animal)
 
-            # CASE 2: Trigger active but different animal takes over
+            # CASE 2: Different animal replaces current
             elif st.session_state.active_animal != confirmed_animal:
                 st.session_state.prediction_buffer.clear()
                 st.session_state.active_animal = confirmed_animal
@@ -156,17 +157,17 @@ if st.session_state.run:
                 alert_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
                 st.session_state.alert_count += 1
-                st.session_state.alert_log.append(
-                    f"Trigger {st.session_state.alert_count}: "
-                    f"{confirmed_animal} at {alert_time}"
-                )
+                st.session_state.encounters.append({
+                    "Trigger": st.session_state.alert_count,
+                    "Animal": confirmed_animal,
+                    "Time": alert_time
+                })
 
                 if ENABLE_SMS and confirmed_animal not in st.session_state.sms_sent_animals:
                     send_sms(FARMER_PHONE, confirmed_animal, 1.0, alert_time)
                     st.session_state.sms_sent_animals.add(confirmed_animal)
 
         else:
-            # No confirmed animal
             if st.session_state.animal_present:
                 st.session_state.absence_counter += 1
 
@@ -186,7 +187,7 @@ if st.session_state.run:
 
         frame_placeholder.image(frame, channels="BGR")
 
-        # -------- DETECTION TABLE --------
+        # -------- LIVE DETECTION TABLE --------
         st.subheader("Detected Animals (Confidence ≥ 0.5)")
         if current_detections:
             st.table(current_detections)
@@ -197,12 +198,14 @@ if st.session_state.run:
 
     cap.release()
 
-# ================= DASHBOARD =================
+# ================= POST-RUN SUMMARY =================
 st.markdown("---")
-st.subheader("Trigger Statistics")
-st.write("Total Triggers:", st.session_state.alert_count)
+st.subheader("Encounter Summary")
+st.write("Total Encounters:", st.session_state.alert_count)
 
-st.subheader("Trigger History")
-for log in st.session_state.alert_log[-10:]:
-    st.write(log)
+if not st.session_state.run and st.session_state.encounters:
+    st.subheader("Encounter Details")
+    st.table(st.session_state.encounters)
+else:
+    st.write("Stop the camera to view encounter details.")
 
