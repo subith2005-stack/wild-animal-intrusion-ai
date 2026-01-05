@@ -2,166 +2,128 @@ import streamlit as st
 import cv2
 import time
 from datetime import datetime
-from alerts.sms_alerts import send_sms
 
 from model.detector import detect_ani
+from model.classifier import classify_animal
 from alerts.alert import trigger_alert
+# from alerts.sms_alert import send_sms_alert
 
-#------------Configuration------------#
+# ---------------- CONFIG ----------------
+CONF_THRESHOLD = 0.7
+ENABLE_SMS = False
+FARMER_PHONE = "+91XXXXXXXXXX"
 
-farmer_phone_number = "+918921828286"
+# ---------------- STREAMLIT SETUP ----------------
+st.set_page_config(page_title="Wild Animal Intrusion Detection")
+st.title("🌾 Wild Animal Intrusion Detection System")
 
-wild_animals = ["elephant", "tiger", "boar", "deer"]
-conf_threshold = 0.5
-
-st.set_page_config(
-    page_title="Wild Animal Intrusion Detection",
-    page_icon=":lion_face:",
-    layout="centered",
-    initial_sidebar_state="expanded",
-)
-
-st.title("Wild Animal Intrusion Detection System")
-st.write(
-    "AI-based real-time early warning system to detect wild animals "
-    "intruding into agricultural fields."
-)
-
-#------------Session State Initialization------------#
+# ---------------- SESSION STATE ----------------
 if "run" not in st.session_state:
     st.session_state.run = False
 
-if "animal_detected" not in st.session_state:
-    st.session_state.animal_detected = False
+if "animal_present" not in st.session_state:
+    st.session_state.animal_present = False
 
 if "alert_count" not in st.session_state:
     st.session_state.alert_count = 0
 
-if "last_alert_time" not in st.session_state:
-    st.session_state.last_alert_time = None
-
 if "alert_log" not in st.session_state:
     st.session_state.alert_log = []
 
-#---------------Functions (Buttons)---------------#
+# ---------------- UI BUTTONS ----------------
 col1, col2 = st.columns(2)
-
 with col1:
-    if st.button("▶ Start Detection"):
+    if st.button("▶ Start Camera"):
         st.session_state.run = True
-        st.session_state.animal_detected = False
+
 with col2:
-    if st.button("⏸ Stop Detection"):
+    if st.button("⏹ Stop Camera"):
         st.session_state.run = False
 
-
-#---------------Placeholder---------------#
 frame_placeholder = st.empty()
 status_placeholder = st.empty()
 
-
-#---------------Live Camera Feed---------------#
+# ---------------- LIVE CAMERA ----------------
 if st.session_state.run:
     cap = cv2.VideoCapture(0)
 
-    if not cap.isOpened():
-        st.error("Error: Could not open webcam.")
-    else:
-        frame_count = 0
-        last_detections = []
+    while st.session_state.run:
+        ret, frame = cap.read()
+        if not ret:
+            break
 
-        while st.session_state.run:
-            ret, frame = cap.read()
-            if not ret:
-                break
-            frame_count += 1
+        detections = detect_ani(frame)
+        wild_detected = False
 
-            if frame_count % 30 == 0:
-                temp_path = "data/sample_images/temp_frame.jpg"
-                cv2.imwrite(temp_path, frame)
-                last_detections = detect_ani(temp_path)
+        for det in detections:
+            x1, y1, x2, y2 = det["box"]
+            conf = det["confidence"]
+            cls_id = det["cls_id"]
 
-            wild_detected = False
+    # ---------------- HUMAN DETECTION ----------------
+            if cls_id == 0 and conf > 0.6:  # person
+                label = "Human"
 
-            for det in last_detections:
-                name = det["name"]
-                conf = det["confidence"]
-                x1, y1, x2, y2 = det["box"]
-
-                color = (0, 0, 255) if name.lower() in wild_animals else (0, 255, 0)
-
-                cv2.rectangle(frame, (x1, y1), (x2, y2), color, 2)
+                cv2.rectangle(frame, (x1, y1), (x2, y2), (0, 255, 0), 2)
                 cv2.putText(
-                    frame,
-                    f"{name} {conf:.2f}",
-                    (x1, y1 - 10),
-                    cv2.FONT_HERSHEY_SIMPLEX,
-                    0.6,
-                    color,
-                    2,
-
-                )
-                
-                if name.lower() in wild_animals and conf >=  conf_threshold:
-                    wild_detected = True
-                    if not st.session_state.animal_detected:
-                        trigger_alert(name, conf)
-                        st.session_state.animal_detected = True 
-
-                        alert_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-
-                        send_sms(
-                            to_number=farmer_phone_number,
-                            animal_name=name,
-                            confidence=conf,
-                            
-                            time=alert_time,
+                            frame, "Human",
+                            (x1, y1 - 10),
+                            cv2.FONT_HERSHEY_SIMPLEX,
+                            0.6,
+                            (0, 255, 0),
+                            2
                             )
 
-                        st.session_state.alert_count += 1
-                        st.session_state.last_alert_time = alert_time
-                        st.session_state.alert_log.append(
-                            {
-                                "time": alert_time,
-                                "animal": name,
-                                "confidence": conf,
-                            }
-                        )
+                continue  # 🔥 DO NOT send humans to classifier
+
+    # ---------------- ANIMAL CLASSIFICATION ----------------
+            crop = frame[y1:y2, x1:x2]
+            if crop.size == 0:
+                continue
+
+            animal, cls_conf = classify_animal(crop)
+
+            cv2.rectangle(frame, (x1, y1), (x2, y2), (0, 0, 255), 2)
+            cv2.putText(
+                        frame,
+                        f"{animal} {cls_conf:.2f}",
+                        (x1, y1 - 10),
+                        cv2.FONT_HERSHEY_SIMPLEX,
+                        0.6,
+                        (0, 0, 255),
+                        2
+                    )
             
-            if not wild_detected:
-                st.session_state.animal_detected = False
+            if conf > CONF_THRESHOLD:
+                wild_detected = True
 
-            
-            frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+                if not st.session_state.animal_present:
+                    trigger_alert(animal, conf)
+                    st.session_state.animal_present = True
 
-            frame_placeholder.image(frame_rgb, channels="RGB")
+                    alert_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                    st.session_state.alert_count += 1
+                    st.session_state.alert_log.append(
+                        f"{st.session_state.alert_count}. {animal} at {alert_time}"
+                    )
 
-            if wild_detected:
-                status_placeholder.error("⚠️ Wild Animal Detected!")
-            else:
-                status_placeholder.success("✅ No Wild Animals Detected.")
-            
-            time.sleep(0.03)
-        
-        cap.release()
+                    # if ENABLE_SMS:
+                    #     send_sms_alert(FARMER_PHONE, animal, conf, alert_time)
 
-st.markdown("## Alert Summary")
-st.subheader("Alert Statistics:")
+        if not wild_detected:
+            st.session_state.animal_present = False
+            status_placeholder.success("✅ No wild animals detected")
 
-st.write(f"**Total Alerts Triggered:** {st.session_state.alert_count}")
+        frame_placeholder.image(frame, channels="BGR")
+        time.sleep(0.03)
 
-if st.session_state.last_alert_time:
-    st.write(f"**Last Alert Time:** {st.session_state.last_alert_time}")
+    cap.release()
 
-else:
-    st.write("**Last Alert Time:** N/A")
+# ---------------- DASHBOARD ----------------
+st.markdown("---")
+st.subheader("📊 Alert Statistics")
+st.write("Total Alerts:", st.session_state.alert_count)
 
-st.subheader("Alert Log:")
-
-if st.session_state.alert_log:
-    for log in st.session_state.alert_log[-5:]:
-        st.write(
-            f"- Time: {log['time']}, Animal: {log['animal']}, Confidence: {log['confidence']:.2f}"
-        )                                                                                               
-else:
-    st.write("No alerts triggered yet.")
+st.subheader("📜 Alert History")
+for log in st.session_state.alert_log[-5:]:
+    st.write(log)

@@ -1,28 +1,22 @@
 from ultralytics import YOLO
 
-model = YOLO("yolov8n.pt")  # load a pretrained YOLOv8n model   
+model = YOLO("yolov8n.pt")
 
-def detect_ani(image_path):
-    results = model(image_path, verbose=False)  # perform inference on an image
-    
+def detect_ani(frame):
+    results = model(frame, verbose=False)
+
     detections = []
-
     for r in results:
-        if r.boxes is None:
-            continue
-        
         for box in r.boxes:
-            cls_id = int(box.cls.item())
-            conf = float(box.conf.item())
-
-            class_name = model.names[cls_id]
-
+            cls_id = int(box.cls[0])        # 🔥 ADD THIS
+            conf = float(box.conf[0])
             x1, y1, x2, y2 = map(int, box.xyxy[0])
 
             detections.append({
-                "name": class_name,
+                "box": (x1, y1, x2, y2),
                 "confidence": conf,
-                "box": (x1, y1, x2, y2)
+                "cls_id": cls_id             # 🔥 ADD THIS
             })
 
     return detections
+

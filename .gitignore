@@ -9,3 +9,5 @@ data/
 *.pt
 
 .DS_Store
+
+ml/animal_dataset/
