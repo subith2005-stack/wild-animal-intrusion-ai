@@ -3,6 +3,7 @@ import cv2
 import time
 from datetime import datetime
 from collections import deque, Counter
+from alarm import play_alarm
 
 from model.detector import detect_animals
 from model.classifier import classify_animal
@@ -22,6 +23,8 @@ FARMER_PHONE = "+918921828286"  # replace with verified number
 # ================= STREAMLIT SETUP =================
 st.set_page_config(page_title="Wild Animal Intrusion Detection")
 st.title("Wild Animal Intrusion Detection System")
+
+
 
 # ================= SESSION STATE =================
 if "run" not in st.session_state:
@@ -146,6 +149,7 @@ if st.session_state.run:
 
                 if ENABLE_SMS and confirmed_animal not in st.session_state.sms_sent_animals:
                     send_sms(FARMER_PHONE, confirmed_animal, 1.0, alert_time)
+                    play_alarm()
                     st.session_state.sms_sent_animals.add(confirmed_animal)
 
             # CASE 2: Different animal replaces current
@@ -165,6 +169,7 @@ if st.session_state.run:
 
                 if ENABLE_SMS and confirmed_animal not in st.session_state.sms_sent_animals:
                     send_sms(FARMER_PHONE, confirmed_animal, 1.0, alert_time)
+                    play_alarm()
                     st.session_state.sms_sent_animals.add(confirmed_animal)
 
         else:
