@@ -2,7 +2,7 @@ from ultralytics import YOLO
 
 model = YOLO("yolov8n.pt")
 
-def detect_ani(frame):
+def detect_animals(frame):
     results = model(frame, verbose=False)
 
     detections = []
