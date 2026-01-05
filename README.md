@@ -184,7 +184,7 @@ Please take immediate action.
 1. **Clone the repository:**
 
    ```bash
-   git clone https://github.com/your-username/wild-animal-intrusion-ai.git
+   git clone https://github.com/subith2005-stack/wild-animal-intrusion-ai.git
    cd wild-animal-intrusion-ai
    ```
 
