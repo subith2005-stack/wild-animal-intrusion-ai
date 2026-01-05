@@ -290,7 +290,7 @@ Users should combine this system with other traditional and modern farming prote
 - **Customizable Alerts**: Configurable alert thresholds and notification preferences
 - **Offline Capability**: Local processing without internet connectivity
 
-12. **Development Methodology and System Evolution**
+## 12. **Development Methodology and System Evolution**
 
 This project was developed through a structured, multi-level progression approach, where each stage addressed a specific technical challenge and built upon the previous one. The system evolved from a basic detection prototype into a robust, event-driven intrusion detection system suitable for real-world agricultural use.
 
@@ -483,4 +483,9 @@ Event-driven system design
 Alert responsibility and discipline
 
 Rather than focusing solely on model accuracy, the project prioritized decision correctness, system reliability, and practical usability, aligning the solution with real agricultural deployment needs.
+
+## 13. **Demo Video of Project**
+https://drive.google.com/file/d/1n4cYSlPyXLr7SI0vAVhg8vKrGJVlB8Og/view?usp=sharing
+
+Click the above link to acces the demo video of the project
 
