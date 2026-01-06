@@ -18,7 +18,7 @@ MIN_STABLE_COUNT = 4
 ABSENCE_THRESHOLD = 10
 
 ENABLE_SMS = True
-FARMER_PHONE = "+918921828286"  # replace with verified number
+FARMER_PHONE = "+91xxxxxxxxxx"  # replace with verified number
 
 # ================= STREAMLIT SETUP =================
 st.set_page_config(page_title="Wild Animal Intrusion Detection")
