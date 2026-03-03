@@ -1,3 +1,4 @@
+/* ================= GLOBAL RESET ================= */
 * {
   margin: 0;
   padding: 0;
@@ -11,7 +12,7 @@ body {
   overflow-x: hidden;
 }
 
-/* Background image */
+/* ================= BACKGROUND ================= */
 body::before {
   content: "";
   position: fixed;
@@ -20,7 +21,6 @@ body::before {
   z-index: -2;
 }
 
-/* Blur + dark overlay */
 body::after {
   content: "";
   position: fixed;
@@ -30,6 +30,7 @@ body::after {
   z-index: -1;
 }
 
+/* ================= DASHBOARD WRAPPER ================= */
 .dashboard {
   max-width: 1200px;
   margin: auto;
@@ -38,6 +39,7 @@ body::after {
   z-index: 2;
 }
 
+/* ================= HEADER ================= */
 .header {
   display: flex;
   justify-content: space-between;
@@ -45,10 +47,12 @@ body::after {
   margin-bottom: 30px;
 }
 
+/* ================= STATUS BADGE ================= */
 .status {
   padding: 10px 25px;
   border-radius: 30px;
   font-weight: bold;
+  letter-spacing: 1px;
 }
 
 .safe {
@@ -70,8 +74,9 @@ body::after {
   100% { box-shadow: 0 0 15px rgba(255,0,0,0.5); }
 }
 
+/* ================= CAMERA SECTION ================= */
 .camera-section {
-  background: rgba(255, 255, 255, 0.08);
+  background: rgba(255,255,255,0.08);
   backdrop-filter: blur(15px);
   border-radius: 16px;
   padding: 20px;
@@ -79,6 +84,31 @@ body::after {
   text-align: center;
 }
 
+/* ===== PREMIUM NEON GLASS BUTTON ===== */
+.camera-section button {
+  padding: 12px 35px;
+  border-radius: 105px;
+  border: 1px solid rgba(0, 230, 118, 0.7);
+  background: rgba(0, 230, 118, 0.15);
+  color: #00ff95;
+  font-weight: bold;
+  cursor: pointer;
+  margin: 0 auto 50px auto;
+  display: block;
+  backdrop-filter: blur(8px);
+
+  box-shadow: 0 0 20px rgba(0, 255, 150, 0.4);
+  transition: 0.3s ease;
+}
+
+.camera-section button:hover {
+  background: #00e676;
+  color: black;
+  transform: scale(1.07);
+  box-shadow: 0 0 30px rgba(0, 255, 150, 0.8);
+}
+
+/* ================= CAMERA WRAPPER ================= */
 .camera-wrapper {
   position: relative;
   display: inline-block;
@@ -86,14 +116,20 @@ body::after {
 
 canvas {
   max-width: 100%;
-  border-radius: 10px;
+  border-radius: 12px;
+  border: 2px solid rgba(255,255,255,0.3);
 }
 
+/* ================= RADAR SWEEP ================= */
 .radar {
   position: absolute;
   inset: 0;
   pointer-events: none;
-  background: radial-gradient(circle at center, rgba(0,255,0,0.2), transparent 60%);
+  background: radial-gradient(
+    circle at center,
+    rgba(0,255,0,0.2),
+    transparent 60%
+  );
   animation: radarSweep 3s linear infinite;
 }
 
@@ -102,6 +138,7 @@ canvas {
   to { transform: rotate(360deg); }
 }
 
+/* ================= BOTTOM PANELS ================= */
 .bottom-section {
   display: flex;
   gap: 20px;
@@ -115,4 +152,31 @@ canvas {
   backdrop-filter: blur(12px);
   border-radius: 16px;
   padding: 20px;
+  transition: transform 0.3s ease;
+}
+
+.panel:hover {
+  transform: translateY(-5px);
+}
+
+/* ================= ALERT POPUP ================= */
+.alert-popup {
+  position: fixed;
+  top: 30px;
+  right: -400px;
+  background: rgba(255,0,0,0.95);
+  padding: 15px 25px;
+  border-radius: 10px;
+  font-weight: bold;
+  box-shadow: 0 0 25px rgba(255,0,0,0.9);
+  animation: slideIn 0.5s forwards, fadeOut 0.5s 3.5s forwards;
+  z-index: 999;
+}
+
+@keyframes slideIn {
+  to { right: 30px; }
+}
+
+@keyframes fadeOut {
+  to { opacity: 0; }
 }

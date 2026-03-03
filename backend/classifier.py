@@ -2,14 +2,18 @@ import torch
 import torch.nn as nn
 from torchvision import models, transforms
 import cv2
-import numpy as np
 import os
 
 # -------- CONFIG --------
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 MODEL_PATH = os.path.join(BASE_DIR, "animal_classifier.pt")
-CLASS_NAMES = ["boar", "deer", "elephant", "tiger"]
-DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
+
+# MUST MATCH TRAINING ORDER
+CLASS_NAMES = ['Bear', 'Deer', 'Elephant', 'Tiger', 'Wild_Boar']
+
+DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
+CONFIDENCE_THRESHOLD = 0.7  # Only accept predictions above this
 
 # -------- LOAD MODEL --------
 model = models.resnet18(weights=None)
@@ -17,13 +21,17 @@ model.fc = nn.Linear(model.fc.in_features, len(CLASS_NAMES))
 
 model.load_state_dict(torch.load(MODEL_PATH, map_location=DEVICE))
 model = model.to(DEVICE)
-model.eval()   # 🔥 VERY IMPORTANT
+model.eval()
 
 # -------- IMAGE PREPROCESS --------
 transform = transforms.Compose([
     transforms.ToPILImage(),
     transforms.Resize((224, 224)),
-    transforms.ToTensor()
+    transforms.ToTensor(),
+    transforms.Normalize(
+        mean=[0.485, 0.456, 0.406],   # ImageNet normalization
+        std=[0.229, 0.224, 0.225]
+    )
 ])
 
 def classify_animal(cropped_img):
@@ -40,5 +48,12 @@ def classify_animal(cropped_img):
         probs = torch.softmax(outputs, dim=1)
         conf, pred = torch.max(probs, 1)
 
-    return CLASS_NAMES[pred.item()], conf.item()
+    confidence = conf.item()
+    predicted_class = CLASS_NAMES[pred.item()]
+
+    # 🔥 UNKNOWN REJECTION
+    if confidence < CONFIDENCE_THRESHOLD:
+        return "unknown", confidence
+
+    return predicted_class, confidence
 
