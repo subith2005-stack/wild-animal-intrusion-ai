@@ -3,9 +3,11 @@ import torch.nn as nn
 from torchvision import models, transforms
 import cv2
 import numpy as np
+import os
 
 # -------- CONFIG --------
-MODEL_PATH = "model/animal_classifier.pt"
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+MODEL_PATH = os.path.join(BASE_DIR, "animal_classifier.pt")
 CLASS_NAMES = ["boar", "deer", "elephant", "tiger"]
 DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
 

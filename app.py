@@ -5,8 +5,8 @@ from datetime import datetime
 from collections import deque, Counter
 from alarm import play_alarm
 
-from model.detector import detect_animals
-from model.classifier import classify_animal
+from backend.detector import detect_animals
+from backend.classifier import classify_animal
 from alerts.sms_alerts import send_sms
 
 # ================= CONFIG =================

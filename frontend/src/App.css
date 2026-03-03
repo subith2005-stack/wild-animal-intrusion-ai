@@ -1,0 +1,118 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: "Segoe UI", sans-serif;
+  min-height: 100vh;
+  color: white;
+  overflow-x: hidden;
+}
+
+/* Background image */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background: url("/forest-bg.jpg") center/cover no-repeat;
+  z-index: -2;
+}
+
+/* Blur + dark overlay */
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(6px);
+  z-index: -1;
+}
+
+.dashboard {
+  max-width: 1200px;
+  margin: auto;
+  padding: 40px 20px;
+  position: relative;
+  z-index: 2;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 30px;
+}
+
+.status {
+  padding: 10px 25px;
+  border-radius: 30px;
+  font-weight: bold;
+}
+
+.safe {
+  background: rgba(0, 255, 100, 0.2);
+  border: 1px solid rgba(0, 255, 100, 0.6);
+  box-shadow: 0 0 20px rgba(0, 255, 100, 0.5);
+}
+
+.danger {
+  background: rgba(255, 0, 0, 0.2);
+  border: 1px solid rgba(255, 0, 0, 0.6);
+  box-shadow: 0 0 30px rgba(255, 0, 0, 0.8);
+  animation: pulseDanger 1.5s infinite;
+}
+
+@keyframes pulseDanger {
+  0% { box-shadow: 0 0 15px rgba(255,0,0,0.5); }
+  50% { box-shadow: 0 0 35px rgba(255,0,0,1); }
+  100% { box-shadow: 0 0 15px rgba(255,0,0,0.5); }
+}
+
+.camera-section {
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(15px);
+  border-radius: 16px;
+  padding: 20px;
+  margin-bottom: 30px;
+  text-align: center;
+}
+
+.camera-wrapper {
+  position: relative;
+  display: inline-block;
+}
+
+canvas {
+  max-width: 100%;
+  border-radius: 10px;
+}
+
+.radar {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(circle at center, rgba(0,255,0,0.2), transparent 60%);
+  animation: radarSweep 3s linear infinite;
+}
+
+@keyframes radarSweep {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.bottom-section {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.panel {
+  flex: 1;
+  min-width: 300px;
+  background: rgba(255,255,255,0.08);
+  backdrop-filter: blur(12px);
+  border-radius: 16px;
+  padding: 20px;
+}
