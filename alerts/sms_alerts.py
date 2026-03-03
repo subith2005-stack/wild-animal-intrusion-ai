@@ -1,5 +1,8 @@
 from twilio.rest import Client
 import os
+from dotenv import load_dotenv
+load_dotenv()
+
 
 TWILIO_ACCOUNT_SID = os.getenv('TWILIO_ACCOUNT_SID')
 TWILIO_AUTH_TOKEN = os.getenv('TWILIO_AUTH_TOKEN')
@@ -24,7 +27,7 @@ def send_sms(to_number, animal_name, confidence, time):  #Sends SMS alert
     client.messages.create(
         body=message_body,
         from_=TWILIO_PHONE_NUMBER,
-        to=to_number
+        to='+91 62354 11730'
     )
 
     print("SMS alert sent successfully.")
