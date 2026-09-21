@@ -13,3 +13,7 @@ data/
 .DS_Store
 
 ml/animal_dataset/
+
+# Training datasets and outputs
+ml/new_data/
+runs/
