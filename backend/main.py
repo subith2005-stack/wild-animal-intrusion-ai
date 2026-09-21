@@ -3,8 +3,8 @@ from fastapi.middleware.cors import CORSMiddleware
 import numpy as np
 import cv2
 from ultralytics import YOLO
-from backend.classifier import classify_animal
 from alerts.sms_alerts import send_sms
+from alarm import play_alarm
 
 app = FastAPI()
 
@@ -68,6 +68,7 @@ async def predict(file: UploadFile = File(...)):
         animal = detections[0]["animal"]
 
         if animal not in alerted_animals:
+            play_alarm()
             send_sms()
             alerted_animals.add(animal)
 
