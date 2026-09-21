@@ -1,34 +1,30 @@
 from twilio.rest import Client
 import os
 from dotenv import load_dotenv
+
 load_dotenv()
 
+TWILIO_ACCOUNT_SID = os.getenv("TWILIO_ACCOUNT_SID")
+TWILIO_AUTH_TOKEN = os.getenv("TWILIO_AUTH_TOKEN")
 
-TWILIO_ACCOUNT_SID = os.getenv('TWILIO_ACCOUNT_SID')
-TWILIO_AUTH_TOKEN = os.getenv('TWILIO_AUTH_TOKEN')
-TWILIO_PHONE_NUMBER = os.getenv('TWILIO_PHONE_NUMBER')
+TWILIO_PHONE_NUMBER = "+17372508034"
+TO_PHONE_NUMBER = "+916235411730"
 
 
-def send_sms(to_number, animal_name, confidence, time):  #Sends SMS alert
-    if not all([TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, TWILIO_PHONE_NUMBER]):
-        print("Twilio credentials are not set properly.")
-        return
-    
-    client = Client(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN)
+def send_sms():
+    """Send the Twilio trial SMS alert."""
 
-    message_body = (
-        f"🚨 ALERT!\n"
-        f"Wild Animal Detected: {animal_name}\n"
-        f"Confidence: {confidence:.2f}\n"
-        f"Time: {time}\n"
-        f"Please take immediate action."
+    client = Client(
+        TWILIO_ACCOUNT_SID,
+        TWILIO_AUTH_TOKEN
     )
 
-    client.messages.create(
-        body=message_body,
+    message = client.messages.create(
+        body="sms_internal_alerts",
         from_=TWILIO_PHONE_NUMBER,
-        to='+91 62354 11730'
+        to=TO_PHONE_NUMBER
     )
 
     print("SMS alert sent successfully.")
-
+    print("Message SID:", message.sid)
+    print("Status:", message.status)

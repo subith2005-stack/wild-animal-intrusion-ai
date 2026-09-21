@@ -41,8 +41,8 @@ function Dashboard() {
       if (!video || !canvas || !streaming) return;
 
       const ctx = canvas.getContext("2d");
-      canvas.width = video.videoWidth;
-      canvas.height = video.videoHeight;
+      canvas.width = 640;
+      canvas.height = 480;
 
       ctx.drawImage(video, 0, 0);
 
@@ -88,9 +88,9 @@ function Dashboard() {
       const canvas = document.createElement("canvas");
       const ctx = canvas.getContext("2d");
 
-      canvas.width = video.videoWidth;
-      canvas.height = video.videoHeight;
-      ctx.drawImage(video, 0, 0);
+      canvas.width = 640;
+      canvas.height = 480;
+      ctx.drawImage(video, 0, 0, 640, 480);
 
       const blob = await new Promise(resolve =>
         canvas.toBlob(resolve, "image/jpeg")
